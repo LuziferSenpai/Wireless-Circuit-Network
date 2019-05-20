@@ -1,0 +1,29 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 20.05.2019
+	New:
+		- German Locale
+		- You can now copy/paste Networks
+	Changes:
+		- Name Change for Entitys/Items
+    Updates:
+    	- Updated to Version 17
+    	- Updated the Code
+    	- Updated the GUI
+    	- Updated the Locale
+---------------------------------------------------------------------------------------------------
+Older Versions:
+	Version: 0.1.5
+		- Added forgotten Recipe Ingredient
+		- A bit of Code rework
+	Version: 0.1.4
+		- Changed the Updates from Sec to Ticks
+		- Now you can have it update every Tick, but that can lagg the Game
+	Version: 0.1.3
+		- Fixed a Bug that the Button is not showing on Player created
+	Version: 0.1.2
+		- Fixed a Bug when on the Wires are no Signal it gives a Error
+	Version: 0.1.1
+		- Added the forgotten OnRemove Stuff
+	Version: 0.1.0
+		- Release

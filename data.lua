@@ -24,7 +24,7 @@ sender_recipe.result = "Wireless-Sender"
 local reciever_entity = util.table.deepcopy( entity )
 reciever_entity.name = "Wireless-Reciever"
 reciever_entity.minable.result = "Wireless-Reciever"
-reciever_entity.item_slot_count = 500
+reciever_entity.item_slot_count = 50000
 
 local reciever_item = util.table.deepcopy( item )
 reciever_item.name = "Wireless-Reciever"
@@ -38,11 +38,25 @@ reciever_recipe.result = "Wireless-Reciever"
 table.insert( data.raw["technology"]["circuit-network"].effects, { type = "unlock-recipe", recipe = "Wireless-Sender" } )
 table.insert( data.raw["technology"]["circuit-network"].effects, { type = "unlock-recipe", recipe = "Wireless-Reciever" } )
 
-data:extend{ sender_entity, sender_item, sender_recipe, reciever_entity, reciever_item, reciever_recipe,
-			 { type = "sprite", name = "Wireless", filename = MODNAME .. "/graphics/Wireless.png", priority = "extra-high-no-scale", width = 32, height = 32, scale = 1 } }
-
-data.raw["sprite"] = data.raw["sprite"] or {}
-
-if not data.raw["sprite"]["Senpais-plus"] then
-	data:extend{ { type = "sprite", name = "Senpais-plus", filename = MODNAME .. "/graphics/plus.png", priority = "extra-high-no-scale", width = 32, height = 32, scale = 1 } }
-end
+data:extend
+{
+	sender_entity, sender_item, sender_recipe, reciever_entity, reciever_item, reciever_recipe,
+	{
+		type = "sprite",
+		name = "Wireless",
+		filename = MODNAME .. "/graphics/Wireless.png",
+		priority = "extra-high-no-scale",
+		width = 32,
+		height = 32,
+		scale = 1
+	},
+	{
+		type = "sprite",
+		name = "Senpais-plus",
+		filename = MODNAME .. "/graphics/plus.png",
+		priority = "extra-high-no-scale",
+		width = 32,
+		height = 32,
+		scale = 1
+	}
+}

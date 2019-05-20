@@ -1,0 +1,30 @@
+mod_gui.get_frame_flow
+	A01 WirelessNetworksGUI
+		A02 WirelessNetworksTable01
+			A03 WirelessNetworksHiddenFrame01
+				A04 WirelessNetworksFrame01
+					A05 WirelessNetworksLabel01
+					A05 WirelessNetworksTable02
+						A06 WirelessNetworksDropDown01
+						A06 WirelessNetworksSpriteButton01
+						A06 WirelessNetworksSpriteButton02
+					C01 WirelessNetworksHiddenFrame03
+						C02 WirelessNetworksLabel02
+						C02 WirelessNetworksFlow01
+							C03 WirelessNetworksTable03
+								C04 WirelessNetworksLabel03
+								C04 WirelessNetworksLabel04
+						C02 WirelessNetworksFlow02
+							C03 WirelessNetworksTable04
+								C04 WirelessNetworksLabel05
+								C04 WirelessNetworksLabel06
+			A03 WirelessNetworksHiddenFrame02
+				B01 WirelessNetworksFrame02
+					B02 WirelessNetworksTextField
+					B02 WirelessNetworksButton
+
+player.gui.center
+	D01 WirelessNetworksFrame03
+		D02 WirelessNetworksLabel07
+		D02 WirelessNetworksLabel08
+		D02 WirelessNetworksDropDown02

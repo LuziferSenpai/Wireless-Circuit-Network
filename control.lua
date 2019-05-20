@@ -1,235 +1,243 @@
 require( "mod-gui" )
-require( "functions" )
+
+local F = require "functions"
+local de = defines.events
+local mf = mod_gui.get_frame_flow
 
 script.on_init( function()
-	Wireless_globals()
-	Wireless_Players()
+	F.Globals()
+	F.Players()
 end )
 
 script.on_configuration_changed( function()
-	Wireless_globals()
-	Wireless_Players()
+	F.Globals()
+	F.Players()
 end )
 
-script.on_event( defines.events.on_gui_click, function( event )
-	local element = event.element
-	local name = element.name
-	local player = game.players[event.player_index]
-	local parent = element.parent or nil
+script.on_event( de.on_gui_click, function( ee )
+	local id = ee.player_index
+	local p = game.players[id]
+	local e = ee.element
+	local n = e.name
+	local pa = e.parent
 
-	if not name then return end
+	if ( n == nil or pa == nil ) then return end
 
-	if name == "WirelessGUIButton" then
-		if mod_gui.get_frame_flow( player ).WirelessNetworksGUI then
-			mod_gui.get_frame_flow( player ).WirelessNetworksGUI.destroy()
+	if n == "WirelessGUIButton" then
+		if mf( p ).WirelessNetworksGUI then
+			mf( p ).WirelessNetworksGUI.destroy()
 		else
-			Wireless_MainGUI( player )
+			F.MainGUI( mf( p ) )
 		end
 		return
 	end
-	if name == "WirelessNetworksGUISpriteButton01" then
-		if parent.parent.parent.parent.children[2].children[1] then
-			parent.parent.parent.parent.children[2].clear()
+	if n == "WirelessNetworksSpriteButton01" then
+		local g = pa.parent.parent.parent.children[2]
+		if g.children[1] then
+			g.clear()
 		else
-			Wireless_AddGUI( parent.parent.parent.parent.children[2] )
+			F.AddGUI( g )
 		end
 		return
 	end
-	if name == "WirelessNetworksGUISpriteButton02" then
-		if parent.children[1].selected_index > 0 then
-			global.WirelessNetworksSender[global.WirelessNetworks[parent.children[1].selected_index]] = nil
-			if #global.WirelessNetworksReciever[global.WirelessNetworks[parent.children[1].selected_index]] then
-				for _, z in pairs( global.WirelessNetworksReciever[global.WirelessNetworks[parent.children[1].selected_index]] ) do
-					local behavior = z.get_or_create_control_behavior()
-					behavior.parameters = { parameters = {} }
-				end
-			end
-			global.WirelessNetworksReciever[global.WirelessNetworks[parent.children[1].selected_index]] = nil
-			table.remove( global.WirelessNetworks, parent.children[1].selected_index )
-			mod_gui.get_frame_flow( player ).WirelessNetworksGUI.destroy()
-			Wireless_MainGUI( player )
-		end
-		return
-	end
-
-	if name == "WirelessNetworksGUIButton" then
-		if parent.children[1].text ~= nil and not global.WirelessNetworks[parent.children[1].text] then
-			table.insert( global.WirelessNetworks, parent.children[1].text )
-			global.WirelessNetworksSender[parent.children[1].text] = {}
-			global.WirelessNetworksReciever[parent.children[1].text] = {}
-		end
-		mod_gui.get_frame_flow( player ).WirelessNetworksGUI.destroy()
-		Wireless_MainGUI( player )
-		return
-	end
-end )
-
-script.on_event( defines.events.on_gui_selection_state_changed, function( event )
-	local element = event.element
-	local player = game.players[event.player_index]
-	local name = element.name
-	local parent = element.parent or nil
-	if not name then return end
-	if name == "WirelessNetworksGUIDropDown01" then
-		if parent.parent.children[3] then parent.parent.children[3].destroy() end
-		Wireless_DisplayGUI( parent.parent, global.WirelessNetworks[element.selected_index] )
-		return
-	end
-	if name == "WirelessNetworksGUIDropDown02" then
-		local data = global.PlayerDATA[player.index]
-		if data.current_index ~= 0 then
-			if data.entity.name == "Wireless-Sender" then
-				for r, l in pairs( global.WirelessNetworksSender[global.WirelessNetworks[data.current_index]] ) do
-					if data.entity == l then
-						global.WirelessNetworksSender[global.WirelessNetworks[data.current_index]][r] = nil
-						break
+	if n == "WirelessNetworksSpriteButton02" then
+		local i = pa.children[1].selected_index
+		if i > 0 then
+			local nn = global.WirelessNetworks.N[i]
+			for _, en in pairs( global.WirelessNetworks.E ) do
+				if en.n == nn then
+					en.n = ""
+					if en.t == "Reciever" then
+						local b = en.e.get_or_create_control_behavior()
+						b.parameters = { parameters = {} }
 					end
 				end
-				table.insert( global.WirelessNetworksSender[global.WirelessNetworks[element.selected_index]], data.entity )
-				global.PlayerDATA[player.index].current_index = element.selected_index
-				return
 			end
-			if data.entity.name == "Wireless-Reciever" then
-				for r, l in pairs( global.WirelessNetworksReciever[global.WirelessNetworks[data.current_index]] ) do
-					if l == data.entity then
-						global.WirelessNetworksReciever[global.WirelessNetworks[data.current_index]][r] = nil
-						break
-					end
-				end
-				table.insert( global.WirelessNetworksReciever[global.WirelessNetworks[element.selected_index]], data.entity )
-				global.PlayerDATA[player.index].current_index = element.selected_index
-				return
-			end
-		else
-			if data.entity.name == "Wireless-Sender" then
-				table.insert( global.WirelessNetworksSender[global.WirelessNetworks[element.selected_index]], data.entity )
-				global.PlayerDATA[player.index].current_index = element.selected_index
-				return
-			end
-			if data.entity.name == "Wireless-Reciever" then
-				table.insert( global.WirelessNetworksReciever[global.WirelessNetworks[element.selected_index]], data.entity )
-				global.PlayerDATA[player.index].current_index = element.selected_index
-				return
-			end
+			global.WirelessNetworks["Sender"][nn] = nil
+			global.WirelessNetworks["Reciever"][nn] = nil
+			table.remove(global.WirelessNetworks.N, i )
+			mf( p ).WirelessNetworksGUI.destroy()
+			F.MainGUI( mf( p ) ) 
 		end
+		return
+	end
+	if n == "WirelessNetworksButton" then
+		local nn = pa.children[2].text
+		if nn ~= nil and not global.WirelessNetworks.N[nn] then
+			table.insert( global.WirelessNetworks.N, nn )
+			global.WirelessNetworks["Sender"][nn] = {}
+			global.WirelessNetworks["Reciever"][nn] = {}
+		end
+		mf( p ).WirelessNetworksGUI.destroy()
+		F.MainGUI( mf( p ) )
+		return
 	end
 end )
 
-script.on_event( defines.events.on_gui_opened, function( event )
-	local player = game.players[event.player_index]
-	if event.entity then
-		local entity = event.entity
-		local found = false
-		if player.gui.center.WirelessNetworksGUIFrame03 then player.gui.center.WirelessNetworksGUIFrame03.destroy() end
-		if entity.name == "Wireless-Sender" then
-			if #global.WirelessNetworks > 0 then
-				for z = 1, #global.WirelessNetworks do
-					if #global.WirelessNetworksSender[global.WirelessNetworks[z]] > 0 then
-						for network, senderentity in pairs( global.WirelessNetworksSender[global.WirelessNetworks[z]] ) do
-							if entity == senderentity then
-								found = true
-								if global.WirelessNetworks[z] then
-									global.PlayerDATA[player.index] = { current_index = z, entity = entity }
-									player.opened = Wireless_ChooseNetworkGUI( player, z )
-								else
-									global.PlayerDATA[player.index] = { current_index = 0, entity = entity }
-									player.opened = Wireless_ChooseNetworkGUI( player, 0 )
-								end
-								return
-							end
+script.on_event( de.on_gui_selection_state_changed, function( ee )
+	local id = ee.player_index
+	local p = game.players[id]
+	local e = ee.element
+	local n = e.name
+	local pa = e.parent
+	local i = e.selected_index
+
+	if ( n == nil or pa == nil ) then return end
+
+	if n == "WirelessNetworksDropDown01" then
+		local paa = pa.parent
+		if paa.children[3] then paa.children[3].destroy() end
+		F.DisplayGUI( paa, global.WirelessNetworks.N[i] )
+		return
+	end
+	if n == "WirelessNetworksDropDown02" then
+		local d = global.PlayerDATA[id]
+		local ci = d.ci
+		local nn = global.WirelessNetworks.N[i]
+		local eee = d.e
+		local ii = eee.unit_number
+		local dd = global.WirelessNetworks.E["E" .. ii]
+		local t = dd.t
+		if ci > 0 then
+			global.WirelessNetworks[t][global.WirelessNetworks.N[ci]]["E" .. ii] = nil
+		end
+		global.WirelessNetworks.E["E" .. ii].n = nn
+		global.PlayerDATA[id].ci = i
+		global.WirelessNetworks[t][nn]["E" .. ii] = true
+		return
+	end
+end )
+
+script.on_event( de.on_gui_opened, function( ee )
+	if ee.gui_type == defines.gui_type.entity then
+		local e = ee.entity
+		if e.unit_number then
+			local id = ee.player_index
+			local p = game.players[id]
+			local i = e.unit_number
+			local n = e.name
+			local g = p.gui.center
+			if g.WirelessNetworksFrame03 then g.WirelessNetworksFrame03.destroy() end
+			if global.WirelessNetworks.E["E" .. i] then
+				local d = global.WirelessNetworks.E["E" .. i]
+				if d.n == "" then
+					global.PlayerDATA[id] = { ci = 0, e = e }
+					p.opened = F.ChooseNetworkGUI( g, 0 )
+				else
+					for z = 1, #global.WirelessNetworks.N do
+						if d.n == global.WirelessNetworks.N[z] then
+							global.PlayerDATA[id] = { ci = z, e = e }
+							p.opened = F.ChooseNetworkGUI( g, z )
+							break
 						end
 					end
 				end
+			elseif ( n == "Wireless-Sender" or n == "Wireless-Reciever" ) then
+				global.WirelessNetworks.E["E" .. i] = { t = n:sub(10), n = "", e = e }
+				global.PlayerDATA[id] = { ci = 0, e = e }
+				p.opened = F.ChooseNetworkGUI( g, 0 )
 			end
-		end
-		if entity.name == "Wireless-Reciever" then
-			if #global.WirelessNetworks > 0 then
-				for z = 1, #global.WirelessNetworks do
-					if #global.WirelessNetworksReciever[global.WirelessNetworks[z]] > 0 then
-						for network, recieverentity in pairs( global.WirelessNetworksReciever[global.WirelessNetworks[z]] ) do
-							if entity == recieverentity then
-								found = true
-								if global.WirelessNetworks[z] then
-									global.PlayerDATA[player.index] = { current_index = z, entity = entity }
-									player.opened = Wireless_ChooseNetworkGUI( player, z )
-								else
-									global.PlayerDATA[player.index] = { current_index = 0, entity = entity }
-									player.opened = Wireless_ChooseNetworkGUI( player, 0 )
-								end
-								return
-							end
-						end
-					end
-				end
-			end
-		end
-		if ( entity.name == "Wireless-Sender" or entity.name == "Wireless-Reciever" ) and not found then
-			global.PlayerDATA[player.index] = { current_index = 0, entity = entity }
-			player.opened = Wireless_ChooseNetworkGUI( player, 0 )
-			return
 		end
 	end
 end )
 
-script.on_event( defines.events.on_gui_closed, function( event )
-	if event.element and event.element.name == "WirelessNetworksGUIFrame03" then
-		event.element.destroy()
-		global.PlayerDATA[game.players[event.player_index].index] = nil
+script.on_event( de.on_gui_closed, function( ee )
+	local e = ee.element
+	if e and e.name == "WirelessNetworksFrame03" then
+		e.destroy()
+		global.PlayerDATA[ee.player_index] = nil
 	end
 end )
 
-script.on_event( defines.events.on_tick, function( event )
-	if event.tick % ( game.speed * settings.global["Network-Update-Sec"].value ) == 0 then
-		if #global.WirelessNetworks > 0 then
-			for _, t in pairs( global.WirelessNetworks ) do
-				local signals = {}
-				if #global.WirelessNetworksSender[t] > 0 then
-					for _, p in pairs( global.WirelessNetworksSender[t] ) do
-						local red = p.get_circuit_network( defines.wire_type.red )
-						local green = p.get_circuit_network( defines.wire_type.green )
-						if red then
-							if red.signals ~= nil and #red.signals > 0 then
-								for _, r in pairs( red.signals ) do
-									local signal_found = false
-									for _, p in pairs( signals ) do
-										if p.signal.name == r.signal.name then
-											p.count = p.count + r.count
-											signal_found = true
-											break
+script.on_event( de.on_entity_settings_pasted, function( ee )
+	local s = ee.source
+	local d = ee.destination
+	local dd = "E" .. d.unit_number
+	local sn = global.WirelessNetworks.E["E" .. s.unit_number] or nil
+	local dn = global.WirelessNetworks.E[dd] or nil
+	if sn ~= nil and next( sn ) and sn.n ~= "" then
+		local n = sn.n
+		local na = d.name
+		if dn ~= nil and next( dn ) then
+			local t = dn.t
+			global.WirelessNetworks[t][dn.n][dd] = ""
+			global.WirelessNetworks.E[dd].n = n
+			global.WirelessNetworks[t][n][dd] = true
+		elseif ( na == "Wireless-Sender" or na == "Wireless-Reciever" ) then
+			local t = na:sub(10)
+			global.WirelessNetworks.E[dd] = { t = t, n = n, e = d }
+			global.WirelessNetworks[t][n][dd] = true
+		end
+	end
+end )
+
+script.on_event( de.on_tick, function( ee )
+	if ee.tick % ( game.speed * settings.global["Network-Update-Sec"].value ) == 0 then
+		local gl = global.WirelessNetworks
+		if next( gl.N ) then
+			for _, nn in pairs( gl.N ) do
+				local s = {}
+				local n = gl["Sender"][nn]
+				if next( n ) then
+					for i, _ in pairs( n ) do
+						local p = gl.E[i].e
+						if p.valid then
+							local r = p.get_circuit_network( defines.wire_type.red )
+							local g = p.get_circuit_network( defines.wire_type.green )
+							if r then
+								if r.signals ~= nil and #r.signals > 0 then
+									for _, z in pairs( r.signals ) do
+										local f = false
+										for _, si in pairs( s ) do
+											if si.signal.name == z.signal.name then
+												si.count = si.count + z.count
+												f = true
+												break
+											end
 										end
+										if not f then table.insert( s, z ) end
 									end
-									if not signal_found then table.insert( signals, r ) end
 								end
 							end
-						end
-						if green then
-							if green.signals ~= nil and #green.signals > 0 then
-								for _, e in pairs( green.signals ) do
-									local signal_found = false
-									for _, p in pairs( signals ) do
-										if p.signal.name == e.signal.name then
-											p.count = p.count + e.count
-											signal_found = true
-											break
+							if g then
+								if g.signals ~= nil and #g.signals > 0 then
+									for _, z in pairs( g.signals ) do
+										local f = false
+										for _, si in pairs( s ) do
+											if si.signal.name == z.signal.name then
+												si.count = si.count + z.count
+												f = true
+												break
+											end
 										end
+										if not f then table.insert( s, z ) end
 									end
-									if not signal_found then table.insert( signals, e ) end
 								end
 							end
+						else
+							global.WirelessNetworks["Sender"][nn][i] = nil
+							global.WirelessNetworks.E[i] = nil
 						end
 					end
 				end
-				if #global.WirelessNetworksReciever[t] > 0 then
-					for _, c in pairs( global.WirelessNetworksReciever[t] ) do
-						local behavior = c.get_or_create_control_behavior()
-						local parameter = {}
-						if #signals > 0 then
-							for g = 1, #signals do
-								local h = { count = signals[g].count, index = g, signal = signals[g].signal }
-								table.insert( parameter, h )
+				n = gl["Reciever"][nn]
+				if next( n ) then
+					for i, _ in pairs( n ) do
+						local p = gl.E[i].e
+						if p.valid then
+							local b = p.get_or_create_control_behavior()
+							local pa = {}
+							if #s >0 then
+								for z = 1, #s do
+									local h = { count = s[z].count, index = z, signal = s[z].signal }
+									table.insert( pa, h )
+								end
 							end
+							b.parameters = { parameters = pa }
+						else
+							global.WirelessNetworks["Reciever"][nn][i] = nil
+							global.WirelessNetworks.E[i] = nil
 						end
-						behavior.parameters = { parameters = parameter }
 					end
 				end
 			end
@@ -237,12 +245,7 @@ script.on_event( defines.events.on_tick, function( event )
 	end
 end )
 
-script.on_event( defines.events.on_player_created, function( event )
-	local player = game.players[event.player_index]
-	local button = Wireless_Add_Sprite_Button( mod_gui.get_button_flow( player ), "WirelessGUIButton", "Wireless" )
-	button.style.visible = true
+script.on_event( defines.events.on_player_created, function( e )
+	local p = game.players[e.player_index]
+	local b = F.AddSpriteButton( mod_gui.get_button_flow( p ), "WirelessGUIButton", "Wireless" )
 end )
-
-script.on_event( defines.events.on_pre_player_mined_item, Wireless_OnRemove )
-script.on_event( defines.events.on_robot_pre_mined, Wireless_OnRemove )
-script.on_event( defines.events.on_entity_died, Wireless_OnRemove )
