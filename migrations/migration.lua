@@ -1,15 +1,7 @@
-game.reload_script()
-
 for index, force in pairs( game.forces ) do
-	force.reset_recipes()
-	force.reset_technologies()
-end
+  	local technologies = force.technologies
+  	local recipes = force.recipes
 
-for index, force in pairs( game.forces ) do
-	local tech = force.technologies
-	local recipe = force.recipes
-	if tech["circuit-network"].researched then
-		if recipe["Wireless-Sender"] then recipe["Wireless-Sender"].enabled = true end
-		if recipe["Wireless-Reciever"] then recipe["Wireless-Reciever"].enabled = true end
-	end
+  	recipes["Wireless-Sender"].enabled = technologies["circuit-network"].researched
+  	recipes["Wireless-Reciever"].enabled = technologies["circuit-network"].researched
 end
