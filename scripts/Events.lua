@@ -549,31 +549,6 @@ lib.on_load = function()
 	script_data = global.script_data or script_data
 end
 
-local AddNetwork = function( addtype, player_id, name, sender, reciever )
-	if addtype == "addnew" and script_data.NetworkNames[name] then
-		game.players[player_id].print( { "Wireless.AlreadyExist" } )
-		
-		return false
-	end
-
-	local Networks = script_data.Networks
-
-	if Networks.Number < 1000 then
-		Networks.Number = Networks.Number + 1
-
-		local index = Format( "%04d", Networks.Number )
-
-		Networks.Names[index] = name
-		Networks.Sender[index] = sender or {}
-		Networks.Reciever[index] = reciever or {}
-
-		script_data.NetworkNames[name] = index
-		return true
-	else
-		return false
-	end
-end
-
 lib.on_configuration_changed = function( event )
 	local changes = event.mod_changes or {}
 

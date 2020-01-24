@@ -1,8 +1,12 @@
 local MODNAME = "__Wireless_Circuit_Network__"
 
 local entity = util.table.deepcopy( data.raw["constant-combinator"]["constant-combinator"] )
+entity.icon_size = 32
+entity.icon_mipmap = nil
 
 local item = util.table.deepcopy( data.raw["item"]["constant-combinator"] )
+item.icon_size = 32
+item.icon_mipmap = nil
 
 local recipe = util.table.deepcopy( data.raw["recipe"]["constant-combinator"] )
 recipe.ingredients = { { "constant-combinator", 1 } }

@@ -4,6 +4,9 @@ Hey Guys,
 
 this modification adds two new entities to the game. First the `Wireless Sender`, that sends all signals from the connected wires to the reciever in his network. Second the `Wireless Reciever` that is like I said before, recieving all signals from the sender on the network. If signals are send multiple times the count gets added up.
 
+I have a [Discord](https://discord.gg/rVpjuh4) for discussion, etc.
+If you want you can support me on [Patreon](https://www.patreon.com/LuziferSenpai).
+
 ##Networks can be created or deleted via a GUI. You can open the GUI when you click on the button in the top left corner. (Circuit Network Tech Icon)
 
 ##You can change the update ratio in settings! Minimum 1 tick, maximum 300 ticks. 1 sec = 60 ticks.
