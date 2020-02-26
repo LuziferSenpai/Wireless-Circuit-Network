@@ -150,7 +150,16 @@ data:extend
 		width = 32,
 		height = 32,
 		scale = 1
-	}
+	},
+	{
+        type = "sprite",
+        name = "Senpais-remove",
+        filename = MODNAME .. "/graphics/remove-icon.png",
+        priority = "extra-high-no-scale",
+        width = 64,
+        height = 64,
+        scale = 1
+    }
 }
 
 local style = data.raw["gui-style"].default

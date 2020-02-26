@@ -69,7 +69,7 @@ GUI.Main = function( parent )
 		["05"] = AddWidget( A["02"]["03"], "WirelessWidgetAGUI02" ),
 		["06"] = AddDropDown( A["02"]["03"], "WirelessDropDownAGUI01", {} ),
 		["07"] = AddSpriteButton( A["02"]["03"], "WirelessSpriteButtonAGUI02", "Senpais-plus", "SenpaisToolButton28" ),
-		["08"] = AddSpriteButton( A["02"]["03"], "WirelessSpriteButtonAGUI03", "utility/remove", "SenpaisToolButton28" ),
+		["08"] = AddSpriteButton( A["02"]["03"], "WirelessSpriteButtonAGUI03", "Senpais-remove", "SenpaisToolButton28" ),
 
 		["09"] = AddLabel( A["02"]["05"], "WirelessLabelAGUI03", { "Wireless.Name" } ),
 		["10"] = AddTextField( A["02"]["05"], "WirelessTextFieldAGUI01", "" ),

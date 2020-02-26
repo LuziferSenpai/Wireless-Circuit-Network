@@ -596,6 +596,16 @@ lib.on_configuration_changed = function( event )
 					global.PlayerData = nil
 					global.WirelessNetworks = nil
 				end
+
+				if oldversion <= "0.3.1" then
+					for _, p in pairs( game.players ) do
+						if next( script_data.GUIS[p.index] ) then
+							script_data.GUIS[p.index].A["01"].destroy()
+							script_data.GUIS[p.index] = {}
+							script_data.Visible = false
+						end
+					end
+				end
 			end
 		end
 
