@@ -315,58 +315,37 @@ local on_tick = function()
 		local signals = {}
 		local index_number = 1
 		local parameters = {}
+		
+		local function UpdateSignalTable(circuit)
+			signals = entity.get_circuit_network(circuit)
+			if signals and signals.signals then
+				for _, signal in pairs( signals.signals ) do
+					if signal then
+						local signal2 = signal.signal
+						local signaltype = signal2.type
+						local signalname = signal2.name
+						local signalcount = signal.count
+
+						if not signaltable[signaltype] then
+							signaltable[signaltype] = {}
+						end
+
+						local signaltabletype = signaltable[signaltype]
+
+						if signaltabletype[signalname] then
+							signaltabletype[signalname].count = signaltabletype[signalname].count + signalcount
+						else
+							signaltabletype[signalname] = { signal = signal2, count = signalcount }
+						end
+					end
+				end
+			end
+		end
 
 		for index, entity in pairs( Networks.Sender[network] ) do
 			if entity.valid then
-				signals = entity.get_circuit_network( wirered )
-
-				if signals and signals.signals then
-					for _, signal in pairs( signals.signals ) do
-						if signal then
-							local signal2 = signal.signal
-							local signaltype = signal2.type
-							local signalname = signal2.name
-							local signalcount = signal.count
-		
-							if not signaltable[signaltype] then
-								signaltable[signaltype] = {}
-							end
-	
-							local signaltabletype = signaltable[signaltype]
-	
-							if signaltabletype[signalname] then
-								signaltabletype[signalname].count = signaltabletype[signalname].count + signalcount
-							else
-								signaltabletype[signalname] = { signal = signal2, count = signalcount }
-							end
-						end
-					end
-				end
-
-				signals = entity.get_circuit_network( wiregreen )
-
-				if signals and signals.signals then
-					for _, signal in pairs( signals.signals ) do
-						if signal then
-							local signal2 = signal.signal
-							local signaltype = signal2.type
-							local signalname = signal2.name
-							local signalcount = signal.count
-		
-							if not signaltable[signaltype] then
-								signaltable[signaltype] = {}
-							end
-	
-							local signaltabletype = signaltable[signaltype]
-	
-							if signaltabletype[signalname] then
-								signaltabletype[signalname].count = signaltabletype[signalname].count + signalcount
-							else
-								signaltabletype[signalname] = { signal = signal2, count = signalcount }
-							end
-						end
-					end
-				end
+				UpdateSignalTable( wirered )
+				UpdateSignalTable( wiregreen )
 			else
 				script_data.Sender[index] = nil
 				script_data.Networks.Sender[network][index] = nil
