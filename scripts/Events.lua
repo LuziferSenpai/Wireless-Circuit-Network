@@ -173,31 +173,6 @@ local UpdatePerTickUpdates = function()
 	script_data.MaximumUpdates = maxvalue
 end
 
-local Events =
-{
-	["WirelessDropDownAGUI01"] = function( event )
-		MainGUIUpdate( event.player_index )
-	end,
-	["WirelessDropDownBGUI01"] = function( event )
-		local player_id = event.player_index
-		local gui = script_data.GUIS[player_id].B["02"]
-		local index_number = Format( "%04d", event.element.selected_index )
-		local index = gui["04"].caption
-		local entitytype = gui["05"].caption
-		local index_number2 = script_data[entitytype][index]
-
-		if index_number2 then
-			script_data.Networks[entitytype][index_number2][index] = nil
-			script_data[entitytype][index] = nil
-		end
-
-		script_data.Networks[entitytype][index_number][index] = gui["06"].entity
-		script_data[entitytype][index] = index_number
-
-		MainGUIUpdateList()
-	end
-}
-
 local Click =
 {
 	["WirelessButton"] = function( event )
@@ -284,6 +259,30 @@ local Click =
 
 		script_data.GUIS[player_id].B["01"].destroy()
 		script_data.GUIS[player_id].B = nil
+	end
+}
+
+local Events =
+{
+	["WirelessDropDownAGUI01"] = function( event )
+		MainGUIUpdate( event.player_index )
+	end,
+	["WirelessDropDownBGUI01"] = function( event )
+		local gui = script_data.GUIS[event.player_index].B["02"]
+		local index_number = Format( "%04d", event.element.selected_index )
+		local index = gui["04"].caption
+		local entitytype = gui["05"].caption
+		local network = script_data[entitytype][index]
+
+		if network then
+			script_data.Networks[entitytype][network][index] = nil
+			script_data[entitytype][index] = nil
+		end
+
+		script_data.Networks[entitytype][index_number][index] = gui["06"].entity
+		script_data[entitytype][index] = index_number
+
+		MainGUIUpdateList()
 	end
 }
 
@@ -409,18 +408,25 @@ local on_tick = function()
 end
 
 local on_entity_cloned = function( event )
-	local entity = event.destination
-	local name = entity.name
+	local source = event.source
+	local destination = event.destination
+	local sourcename = source.name
+	local destinationname = destination.name
 
-	if WirelessNames[name] then
-		local entitytype = name:sub( 10 )
-		local source = event.source
-		local network = script_data[source.name:sub( 10 )]["E" .. source.unit_number]
+	if WirelessNames[sourcename] and WirelessNames[destinationname] then
+		local network = script_data[sourcename:sub( 10 )]["E" .. source.unit_number]
 
-		if network then
-			local index = "E" .. entity.unit_number
-			script_data.Networks[entitytype][network][index] = entity
-			script_data[entitytype][index] = network
+		if network ~= nil then
+			local index = "E" .. destination.unit_number
+			local destinationtype = destinationname:sub( 10 )
+			local destinationdata = script_data[destinationtype][index]
+
+			if destinationdata ~= nil then
+				script_data.Networks[destinationtype][destinationdata][index] = nil
+			end
+
+			script_data[destinationtype][index] = network
+			script_data.Networks[destinationtype][network][index] = destination
 
 			MainGUIUpdateList()
 		end
@@ -498,7 +504,7 @@ local on_player_removed = function( event )
 	local player_id = event.player_index
 
 	script_data.Position[player_id] = nil
-	script_data.GUI[player_id] = nil
+	script_data.GUIS[player_id] = nil
 	script_data.Visible[player_id] = nil
 end
 

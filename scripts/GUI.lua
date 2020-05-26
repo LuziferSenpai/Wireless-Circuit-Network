@@ -4,10 +4,6 @@ local AddButton = function( parent, name, caption, style )
 	return parent.add{ type = "button", name = name, caption = caption, style = style }
 end
 
-local AddCheckbox = function( parent, name, caption, style )
-	return parent.add{ type = "checkbox", name = name, caption = caption, state = false, style = style }
-end
-
 local AddDropDown = function( parent, name, items, style )
 	return parent.add{ type = "drop-down", name = name, items = items, style = style }
 end
@@ -63,7 +59,7 @@ GUI.Main = function( parent )
 	{
 		["01"] = AddLabel( A["02"]["01"], "WirelessLabelAGUI01", { "Wireless.Title" }, "frame_title" ),
 		["02"] = AddWidget( A["02"]["01"], "WirelessWidgetAGUI01", "draggable_space_header" ),
-		["03"] = AddSpriteButton( A["02"]["01"], "WirelessSpriteButtonAGUI01", "utility/close_white", "close_button" ),
+		["03"] = AddSpriteButton( A["02"]["01"], "WirelessSpriteButtonAGUI01", "utility/close_white", "frame_action_button" ),
 
 		["04"] = AddLabel( A["02"]["03"], "WirelessLabelAGUI02", { "Wireless.NetworkTitle" }, "caption_label" ),
 		["05"] = AddWidget( A["02"]["03"], "WirelessWidgetAGUI02" ),
@@ -105,7 +101,7 @@ GUI.EntityGUI = function( parent )
 	B["02"] =
 	{
 		["01"] = AddFlow( B["01"], "WirelessFlowBGUI01", "horizontal", "SenpaisFlowCenter/Left8" ),
-		["02"] = AddLine( B["01"], "WirleessLineBGUI01", "horizontal", "SenpaisLine4" ),
+		["02"] = AddLine( B["01"], "WireleessLineBGUI01", "horizontal", "SenpaisLine4" ),
 		["03"] = AddDropDown( B["01"], "WirelessDropDownBGUI01", {} ),
 		["04"] = AddLabel( B["01"], "WirelessLabelBGUI01", "" ),
 		["05"] = AddLabel( B["01"], "WirelessLabelBGUI02", "" ),
@@ -115,7 +111,7 @@ GUI.EntityGUI = function( parent )
 	{
 		["01"] = AddLabel( B["02"]["01"], "WirelessLabelBGUI03", { "Wireless.Network" }, "frame_title" ),
 		["02"] = AddWidget( B["02"]["01"], "WirelessWidgetBGUI01" ),
-		["03"] = AddSpriteButton( B["02"]["01"], "WirelessSpriteButtonBGUI01", "utility/close_white", "close_button" )
+		["03"] = AddSpriteButton( B["02"]["01"], "WirelessSpriteButtonBGUI01", "utility/close_white", "frame_action_button" )
 	}
 
 	B["02"]["03"].style.horizontally_stretchable = true
