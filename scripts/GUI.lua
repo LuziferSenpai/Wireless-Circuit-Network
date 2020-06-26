@@ -43,7 +43,7 @@ end
 GUI.Main = function( parent )
 	local A = {}
 
-	A["01"] = AddFrame( parent, "WirelessFrameAGUI01", "dialog_frame" )
+	A["01"] = AddFrame( parent, "WirelessFrameAGUI01" )
 	A["02"] =
 	{
 		["01"] = AddFlow( A["01"], "WirelessFlowAGUI01", "horizontal", "SenpaisFlowCenter/Left8" ),
@@ -97,7 +97,7 @@ end
 GUI.EntityGUI = function( parent )
 	local B = {}
 
-	B["01"] = AddFrame( parent, "WirelessFrameBGUI01", "dialog_frame" )
+	B["01"] = AddFrame( parent, "WirelessFrameBGUI01" )
 	B["02"] =
 	{
 		["01"] = AddFlow( B["01"], "WirelessFlowBGUI01", "horizontal", "SenpaisFlowCenter/Left8" ),
