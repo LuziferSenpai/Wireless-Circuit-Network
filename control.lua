@@ -1,2 +1,2 @@
 local handler = require "event_handler"
-handler.add_lib( require "scripts/Events" )
+handler.add_lib(require "scripts/Events")

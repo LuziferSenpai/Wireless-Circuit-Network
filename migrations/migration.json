@@ -1,0 +1,14 @@
+{
+    "entity": [
+        ["Wireless-Sender", "wireless-transmitter"],
+        ["Wireless-Reciever", "wireless-reciever"]
+    ],
+    "item": [
+        ["Wireless-Sender", "wireless-transmitter"],
+        ["Wireless-Reciever", "wireless-reciever"]
+    ],
+    "recipe": [
+        ["Wireless-Sender", "wireless-transmitter"],
+        ["Wireless-Reciever", "wireless-reciever"]
+    ]
+}

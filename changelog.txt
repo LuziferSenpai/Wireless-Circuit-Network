@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.4.0
+Date: 19.07.2020
+  Bugfixes:
+    - Fixed a few bugs with copy/paste etc.
+  Changes:
+    - Changed the full code
+    - Changed the entity name internal
+    - Improved UPS
+---------------------------------------------------------------------------------------------------
 Version: 0.3.4
 Date: 25.06.2020
   Bugfixes:
@@ -21,41 +30,55 @@ Date: 24.01.2020
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 09.11.2019
-  New:
+  Features:
     - New graphics
     - Interaction with Rich Text Helper(Still need to update that mod)
     - Added error messages
   Changes:
     - New GUI's
     - Better UPS perfomance
-  Updates:
     - Updated locales
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
 Date: 20.05.2019
-  New:
+  Features:
     - German Locale
     - You can now copy/paste Networks
   Changes:
     - Name Change for Entitys/Items
-  Updates:
     - Updated to Version 17
     - Updated the Code
     - Updated the GUI
     - Updated the Locale
 ---------------------------------------------------------------------------------------------------
-Older Versions:
-  Version: 0.1.5
+Version: 0.1.5
+Date: -
+  Changes:
     - Added forgotten Recipe Ingredient
     - A bit of Code rework
-  Version: 0.1.4
+---------------------------------------------------------------------------------------------------
+Version: 0.1.4
+Date: -
+  Changes:
     - Changed the Updates from Sec to Ticks
     - Now you can have it update every Tick, but that can lagg the Game
-  Version: 0.1.3
+---------------------------------------------------------------------------------------------------
+Version: 0.1.3
+Date: -
+  Bugfixes:
     - Fixed a Bug that the Button is not showing on Player created
-  Version: 0.1.2
+---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+Date: -
+  Bugfixes:
     - Fixed a Bug when on the Wires are no Signal it gives a Error
-  Version: 0.1.1
+---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: -
+  Features:
     - Added the forgotten OnRemove Stuff
-  Version: 0.1.0
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: -
+  Features:
     - Release

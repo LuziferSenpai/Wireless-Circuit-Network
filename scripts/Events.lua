@@ -1,516 +1,332 @@
 require "mod-gui"
 require "util"
 
-local GUI = require "GUI"
-local de = defines.events
-local Format = string.format
-local mod_button_flow = mod_gui.get_button_flow
-local wirered = defines.wire_type.red
-local wiregreen = defines.wire_type.green
-local mathmin = math.min
-local mathmax = math.max
-local mathfloor = math.floor
-local WirelessNames =
+local player_lib = require "scripts/Player"
+local network_lib = require "scripts/Network"
+local definesevents = defines.events
+local wirelessnames =
 {
-	["Wireless-Sender"] = true,
-	["Wireless-Reciever"] = true
+	["wireless-transmitter"] = true,
+	["wireless-reciever"] = true
 }
 local script_data =
 {
-	PerTickUpdates = {},
-	CurrentUpdateTick = 1,
-	MaximumUpdates = 0,
-	Sender = {},
-	Reciever = {},
-	
-	NetworkNames = {},
-	Networks =
-	{
-		Number = 0,
-		Names = {},
-		Sender = {},
-		Reciever = {}
-	},
-
-	--PlayerData
-	GUIS = {},
-	Position = {},
-	Visible = {}
+	players = {},
+	pertickupdates = {},
+	currenttick = 1,
+	maximumupdates = 0,
+	networks = {},
+	index = 1,
+	networknames = {},
+	names = {},
+	transmitter = {},
+	reciever = {}
 }
 
-local CloseEntityGUIS = function()
-	local gui = script_data.GUIS
-
-	if not gui then return end
-	
-	for _, player in pairs( game.players ) do
-		local player_id = player.index
-
-		if next( gui[player_id] ) and gui[player_id].B then
-			gui[player_id].B["01"].destroy()
-			gui[player_id].B = nil
+local update_players = function(network)
+	for _, player in pairs(script_data.players) do
+		if player.dropdown and script_data.networknames(player.dropdown.selected_index) == network.name then
+			player.transmitterlabel.caption = table_size(network.transmitter)
+			player.recieverlabel.caption = table_size(network.reciever)
 		end
 	end
 end
 
-local MainGUIToggle = function( player_id )
-	local player = game.players[player_id]
-	local screen = player.gui.screen
+local playerstart = function(player_index)
+    if 	not script_data.players[tostring(player_index)] then
+        local player = player_lib.new(game.players[player_index])
 
-	if screen.WirelessFrameAGUI01 then
-		local gui = script_data.GUIS[player_id].A["01"]
-
-		gui.visible = not gui.visible
-	else
-		local gui = GUI.Main( screen )
-
-		gui["01"].location = script_data.Position[player_id]
-	
-		gui["03"]["06"].items = script_data.Networks.Names
-
-		script_data.GUIS[player_id].A = gui
-	end
-
-	local Visible = script_data.Visible
-	Visible[player_id] = not Visible[player_id]
+        script_data.players[player.index] = player
+    end
 end
 
-local MainGUIAddToggle = function( player_id )
-	local gui = script_data.GUIS[player_id].A["02"]
-
-	gui["05"].visible = not gui["05"].visible
-	gui["06"].visible = not gui["06"].visible
+local playerload = function()
+    for _, player in pairs(game.players) do
+        playerstart(player.index)
+    end
 end
 
-local MainGUIUpdate = function( player_id )
-	local gui = script_data.GUIS[player_id]
-	if next( gui ) then
-		gui = gui.A
+local updatepertickupdates = function()
+	script_data.pertickupdates = {}
 
-		local selected_index = gui["03"]["06"].selected_index
-		if selected_index > 0 then
-			local index = Format( "%04d", selected_index )
-		
-			gui["02"]["07"].visible = true
-			gui["02"]["08"].visible = true	
-			gui["03"]["14"].caption = table_size( script_data.Networks.Sender[index] )
-			gui["03"]["16"].caption = table_size( script_data.Networks.Reciever[index] )
-		else
-			gui["02"]["07"].visible = false
-			gui["02"]["08"].visible = false	
-			gui["03"]["14"].caption = 0
-			gui["03"]["16"].caption = 0
-		end
-	end
-end
-
-local MainGUIUpdateList = function()
-	local gui = script_data.GUIS
-	local player_id = 0
-
-	for _, player in pairs( game.players ) do
-		player_id = player.index
-
-		if next( gui[player_id] ) then
-			gui[player_id].A["03"]["06"].items = script_data.Networks.Names
-
-			MainGUIUpdate( player_id )
-		end
-	end
-end
-
-local AddNetwork = function( addtype, player_id, name, sender, reciever )
-	if addtype == "addnew" and script_data.NetworkNames[name] then
-		if type( player_id ) == "number" then
-			game.players[player_id].print( { "Wireless.AlreadyExist" } )
-		end
-		
-		return false
-	end
-
-	local Networks = script_data.Networks
-
-	if Networks.Number < 1000 then
-		Networks.Number = Networks.Number + 1
-
-		local index = Format( "%04d", Networks.Number )
-
-		Networks.Names[index] = name
-		Networks.Sender[index] = sender or {}
-		Networks.Reciever[index] = reciever or {}
-
-		script_data.NetworkNames[name] = index
-		
-		return true
-	else
-		return false
-	end
-end
-
-local UpdatePerTickUpdates = function()
-	script_data.PerTickUpdates = {}
-
-	local PerTickUpdates = script_data.PerTickUpdates
+	local pertickupdates = script_data.pertickupdates
 	local maxvalue = settings.global["Network-Update-Sec"].value
-	
+
 	for i = 1, maxvalue do
-		PerTickUpdates[i] = {}
+		pertickupdates[i] = {}
 	end
 
 	local currentnumber = 1
 
-	for _, index in pairs( script_data.NetworkNames ) do
-		table.insert( PerTickUpdates[currentnumber], index )
-
-		currentnumber = currentnumber + 1
-
-		if currentnumber > maxvalue then
+	for index, _ in pairs(script_data.networks) do
+		table.insert(pertickupdates[currentnumber], index)
+		
+		if currentnumber == maxvalue then
 			currentnumber = 1
-		end
-	end
-
-	script_data.CurrentUpdateTick = 1
-	script_data.MaximumUpdates = maxvalue
-end
-
-local Click =
-{
-	["WirelessButton"] = function( event )
-		MainGUIToggle( event.player_index )
-	end,
-	["WirelessButtonAGUI01"] = function( event )
-		local player_id = event.player_index
-		local gui = script_data.GUIS[player_id].A["03"]
-		local text = gui["10"].text
-
-		if text:len() > 0 then
-			if AddNetwork( "addnew", player_id, text ) then
-				MainGUIAddToggle( player_id )
-
-				gui["10"].text = ""
-
-				MainGUIUpdateList()
-				UpdatePerTickUpdates()
-			end
 		else
-			game.players[player_id].print( { "Wireless.NoName" } )
+			currentnumber = currentnumber + 1
 		end
-	end,
-	["WirelessSpriteButtonAGUI01"] = function( event )
-		local player_id = event.player_index
-
-		script_data.GUIS[player_id].A["01"].visible = false
-		script_data.Visible[player_id] = false
-	end,
-	["WirelessSpriteButtonAGUI02"] = function( event )
-		MainGUIAddToggle( event.player_index )
-	end,
-	["WirelessSpriteButtonAGUI03"] = function( event )
-		local player_id = event.player_index
-		local gui = script_data.GUIS[player_id]
-		local selected_index = gui.A["03"]["06"].selected_index
-
-		if selected_index > 0 then
-			CloseEntityGUIS()
-			
-			local index_number = Format( "%04d", selected_index )
-			local Networks = script_data.Networks
-			local Sender = Networks.Sender[index_number]
-			local Reciever = Networks.Reciever[index_number]
-
-			for index, entity in pairs( Sender ) do
-				script_data.Sender[index] = nil
-			end
-
-			for index, entity in pairs( Reciever ) do
-				entity.get_or_create_control_behavior().parameters = { parameters = {} }
-
-				script_data.Reciever[index] = nil
-			end
-
-			script_data.NetworkNames[Networks.Names[index_number]] = nil
-
-			Networks.Names[index_number] = nil
-			Networks.Sender[index_number] = nil
-			Networks.Reciever[index_number] = nil
-
-			script_data.Networks =
-			{
-				Number = 0,
-				Names = {},
-				Sender = {},
-				Reciever = {}
-			}
-
-			local Names = Networks.Names
-			
-			for entry, name in pairs( Names ) do
-				AddNetwork( "", player_id, name, Networks.Sender[entry], Networks.Reciever[entry] )
-			end
-
-			MainGUIUpdateList()
-			UpdatePerTickUpdates()
-		else
-			game.players[player_id].print( { "Wireless.NothingSelected" } )
-		end
-	end,
-	["WirelessSpriteButtonBGUI01"] = function( event )
-		local player_id = event.player_index
-
-		script_data.GUIS[player_id].B["01"].destroy()
-		script_data.GUIS[player_id].B = nil
-	end
-}
-
-local Events =
-{
-	["WirelessDropDownAGUI01"] = function( event )
-		MainGUIUpdate( event.player_index )
-	end,
-	["WirelessDropDownBGUI01"] = function( event )
-		local gui = script_data.GUIS[event.player_index].B["02"]
-		local index_number = Format( "%04d", event.element.selected_index )
-		local index = gui["04"].caption
-		local entitytype = gui["05"].caption
-		local network = script_data[entitytype][index]
-
-		if network then
-			script_data.Networks[entitytype][network][index] = nil
-			script_data[entitytype][index] = nil
-		end
-
-		script_data.Networks[entitytype][index_number][index] = gui["06"].entity
-		script_data[entitytype][index] = index_number
-
-		MainGUIUpdateList()
-	end
-}
-
-local PlayerStart = function( player_id )
-	local player = game.players[player_id]
-	local button_flow = mod_button_flow( player )
-
-	if not button_flow.WirelessButton then
-		local b = GUI.AddSpriteButton( button_flow, "WirelessButton", "Wireless" )
 	end
 
-	script_data.Position[player_id] = script_data.Position[player_id] or { x = 5, y = 85 * player.display_scale }
-	script_data.GUIS[player_id] = script_data.GUIS[player_id] or {}
-	script_data.Visible[player_id] = script_data.Visible[player_id] or false
-end
-
-local PlayerLoad = function()
-	for _, player in pairs( game.players ) do
-		PlayerStart( player.index )
-	end
+	script_data.currenttick = 1
+	script_data.maximumupdates = maxvalue
 end
 
 --Events
 local on_tick = function()
-	local Networks = script_data.Networks
+	local networks = script_data.networks
+	local currenttick = script_data.currenttick
+	local updatenetworks = script_data.pertickupdates[currenttick]
 	
-	for _, network in pairs( script_data.PerTickUpdates[script_data.CurrentUpdateTick] ) do
-		local signaltable = {}
-		local signals = {}
-		local index_number = 1
-		local parameters = {}
-
-		for index, entity in pairs( Networks.Sender[network] ) do
-			if entity.valid then
-				signals = entity.get_circuit_network( wirered )
-
-				if signals and signals.signals then
-					for _, signal in pairs( signals.signals ) do
-						if signal then
-							local signal2 = signal.signal
-							local signaltype = signal2.type
-							local signalname = signal2.name
-							local signalcount = signal.count
-		
-							if not signaltable[signaltype] then
-								signaltable[signaltype] = {}
-							end
-	
-							local signaltabletype = signaltable[signaltype]
-	
-							if signaltabletype[signalname] then
-								signaltabletype[signalname].count = signaltabletype[signalname].count + signalcount
-							else
-								signaltabletype[signalname] = { signal = signal2, count = signalcount }
-							end
-						end
-					end
-				end
-
-				signals = entity.get_circuit_network( wiregreen )
-
-				if signals and signals.signals then
-					for _, signal in pairs( signals.signals ) do
-						if signal then
-							local signal2 = signal.signal
-							local signaltype = signal2.type
-							local signalname = signal2.name
-							local signalcount = signal.count
-		
-							if not signaltable[signaltype] then
-								signaltable[signaltype] = {}
-							end
-	
-							local signaltabletype = signaltable[signaltype]
-	
-							if signaltabletype[signalname] then
-								signaltabletype[signalname].count = signaltabletype[signalname].count + signalcount
-							else
-								signaltabletype[signalname] = { signal = signal2, count = signalcount }
-							end
-						end
-					end
-				end
-			else
-				script_data.Sender[index] = nil
-				script_data.Networks.Sender[network][index] = nil
-
-				MainGUIUpdateList()
-			end
-		end
-
-		for index, entity in pairs( Networks.Reciever[network] ) do
-			if entity.valid then
-				index_number = 1
-				parameters = {}
-
-				for _, signals2 in pairs( signaltable ) do
-					for _, signals3 in pairs( signals2 ) do
-						if index_number < 1000 then
-							parameters[index_number] = { index = index_number, signal = signals3.signal, count = mathmin( 2147483647, mathmax( -2147483647, mathfloor( signals3.count or 1 ) ) ) }
-							index_number = index_number + 1
-						else
-							break
-						end
-					end
-				end
-
-				entity.get_or_create_control_behavior().parameters = { parameters = parameters }
-			else
-				script_data.Reciever[index] = nil
-				script_data.Networks.Reciever[network][index] = nil
-
-				MainGUIUpdateList()
-			end
-		end
+	for _, index in pairs( updatenetworks ) do
+		networks[index]:update()
 	end
 
-	script_data.CurrentUpdateTick = script_data.CurrentUpdateTick + 1
-
-	if script_data.CurrentUpdateTick > script_data.MaximumUpdates then
-		script_data.CurrentUpdateTick = 1
+	if currenttick == script_data.maximumupdates then
+		script_data.currenttick = 1
+	else
+		script_data.currenttick = currenttick + 1
 	end
 end
 
-local on_entity_cloned = function( event )
+local on_entity_cloned = function(event)
 	local source = event.source
 	local destination = event.destination
 	local sourcename = source.name
 	local destinationname = destination.name
 
-	if WirelessNames[sourcename] and WirelessNames[destinationname] then
-		local network = script_data[sourcename:sub( 10 )]["E" .. source.unit_number]
+	if wirelessnames[sourcename] and wirelessnames[destinationname] then
+		local network = script_data[sourcename:sub(10)][tostring(source.unit_number)]
 
-		if network ~= nil then
-			local index = "E" .. destination.unit_number
-			local destinationtype = destinationname:sub( 10 )
-			local destinationdata = script_data[destinationtype][index]
+		if network then
+			local index = tostring(destination.unit_number)
+			local destinationtype = destinationname:sub(10)
+			local destinationnetwork = script_data[destinationtype][index]
 
-			if destinationdata ~= nil then
-				script_data.Networks[destinationtype][destinationdata][index] = nil
+			if destinationnetwork then
+				script_data.networks[destinationnetwork]:remove(destination)
 			end
 
 			script_data[destinationtype][index] = network
-			script_data.Networks[destinationtype][network][index] = destination
+			script_data.networks[network]:add(destination)
 
-			MainGUIUpdateList()
+			update_players(script_data.networks[network])
 		end
 	end
 end
 
-local on_gui_click = function( event )
-	local click = Click[event.element.name]
+local on_gui_click = function(event)
+	local name = event.element.name
 
-	if click then
-		click( event )
+	if name:sub(1, 14) == "WIRELESS_CLICK" then
+		local player_id = event.player_index
+		local player = game.players[player_id]
+		local playermeta = script_data.players[tostring(player_id)]
+		local number = name:sub(16, 17)
+
+		if number == "01" then
+			if playermeta.frame then
+				playermeta:clear()
+			else
+				playermeta:gui(script_data.networknames)
+			end
+		elseif number == "02" then
+			playermeta:clear()
+		elseif number == "03" then
+			local selected_index = playermeta.dropdown.selected_index
+
+			if selected_index > 0 then
+				local networkname = script_data.networknames[selected_index]
+				local index = script_data.names[networkname]
+				local network = script_data.networks[index]
+
+				for index_number, _ in pairs(network.transmitter) do
+					script_data.transmitter[index_number] = nil
+				end
+
+				for index_number, _ in pairs(network.reciever) do
+					script_data.reciever[index_number] = nil
+				end
+
+				script_data.networknames[selected_index] = nil
+				script_data.names[network.name] = nil
+				script_data.networks[index] = nil
+
+				if next(script_data.networks) then
+					for _, scriptplayer in pairs(script_data.players) do
+						local dropdown = scriptplayer.dropdown
+
+						if dropdown then
+							dropdown.items = script_data.networknames
+							selected_index = dropdown.selected_index
+
+							if selected_index == 0 then
+								scriptplayer.transmitterflow.visible = false
+								scriptplayer.transmitterlabel.caption = ""
+								scriptplayer.recieverflow.visible = false
+								scriptplayer.recieverlabel.caption = ""
+								scriptplayer.line.visible = false
+							else
+								local network2 = script_data.networks[script_data.names[script_data.networknames[selected_index]]]
+								scriptplayer.transmitterlabel.caption = table_size(network2.transmitter)
+								scriptplayer.recieverlabel.caption = table_size(network2.reciever)
+							end
+						end
+					end
+				else
+					for _, scriptplayer in pairs(script_data.players) do
+						if scriptplayer.dropdown then
+							scriptplayer.dropdown.items = {}
+							scriptplayer.transmitterflow.visible = false
+							scriptplayer.transmitterlabel.caption = ""
+							scriptplayer.recieverflow.visible = false
+							scriptplayer.recieverlabel.caption = ""
+							scriptplayer.line.visible = false
+						end
+					end
+				end
+			else
+				player.print({"Wireless.NothingSelected"})
+			end
+		elseif number == "04" then
+			local text = playermeta.textfield.text
+
+			if #text > 0 then
+				if script_data.names[text] then
+					player.print({"Wireless.AlreadyExist"})
+				else
+					local index = tostring(script_data.index)
+
+					script_data.networks[index] = network_lib.new(index, text)
+					table.insert(script_data.networknames, text)
+					script_data.names[text] = index
+
+					script_data.index = script_data.index + 1
+
+					updatepertickupdates()
+
+					for _, scriptplayer in pairs(script_data.players) do
+						if scriptplayer.dropdown then
+							scriptplayer.dropdown.items = script_data.networknames
+						end
+					end
+				end
+			else
+				player.print({"Wireless.NoName"})
+			end
+		elseif number == "05" then
+			playermeta:clearentity()
+		end
 	end
 end
 
-local on_gui_closed = function( event )
+local on_gui_closed = function(event)
 	local element = event.element
 
-	if element and element.name == "WirelessFrameBGUI01" then
-		element.destroy()
-
-		script_data.GUIS[event.player_index].B = nil
+	if element and element.name == "WIRELESS_ENTITY_GUI" then
+		script_data.players[tostring(event.player_index)]:clearentity()
 	end
 end
 
-local on_gui_location_changed = function( event )
-	local element = event.element
-
-	if element.name == "WirelessFrameAGUI01" then
-		script_data.Position[event.player_index] = element.location
-	end
+local on_gui_location_changed = function(event)
+    local playermeta = script_data.players[tostring(event.player_index)]
+    local element = event.element
+    if playermeta.frame and element.index == playermeta.frame.index then
+        playermeta.location = element.location
+    end
 end
 
-local on_gui_opened = function( event )
+local on_gui_opened = function(event)
 	if event.gui_type == defines.gui_type.entity then
 		local entity = event.entity
 		local name = entity.name
 
-		if WirelessNames[name] then
-			local player_id = event.player_index
-			local player = game.players[player_id]
-			local index = "E" .. entity.unit_number
-			local center = player.gui.center
-			local entitytype = name:sub( 10 )
-			local gui = GUI.EntityGUI( center )
+		if wirelessnames[name] then
+			local number = 0
+			local index = script_data[name:sub(10)][tostring(entity.unit_number)]
+			
+			if index then
+				local networkname = script_data.networks[index].name
+				local networknames = script_data.networknames
 
-			gui["02"]["03"].items = script_data.Networks.Names
-			gui["02"]["04"].caption = index
-			gui["02"]["05"].caption = entitytype
-			gui["02"]["06"].entity = entity
-
-			if script_data[entitytype][index] then
-				gui["02"]["03"].selected_index = tonumber( script_data[entitytype][index] )
+				for i = 1, #networknames do
+					if networknames[i] == networkname then
+						number = i
+						
+						break
+					end
+				end
 			end
 
-			script_data.GUIS[player_id].B = gui
-
-			player.opened = gui["01"]
+			script_data.players[tostring(event.player_index)]:entitygui(script_data.networknames, number, entity)
 		end
 	end
 end
 
-local on_gui_event = function( event )
-	local events = Events[event.element.name]
-		
-	if events then
-		events( event )
+local on_gui_selection_state_changed = function(event)
+	local element = event.element
+	local name = element.name
+
+	if name:sub(1, 13) == "WIRELESS_DROP" then
+		local playermeta = script_data.players[tostring(event.player_index)]
+		local selected_index = element.selected_index
+		local network = script_data.networks[script_data.names[script_data.networknames[selected_index]]]
+		local number = name:sub(15, 16)
+
+		if number == "01" then
+			playermeta.transmitterflow.visible = true
+			playermeta.transmitterlabel.caption = table_size(network.transmitter)
+			playermeta.recieverflow.visible = true
+			playermeta.recieverlabel.caption = table_size(network.transmitter)
+			playermeta.line.visible = true
+		elseif number == "02" then
+			local entity = playermeta.entity
+			local index = tostring(entity.unit_number)
+			local entitytype = entity.name:sub(10)
+			local entitynetwork = script_data[entitytype][index]
+
+			if entitynetwork then
+				script_data.networks[entitynetwork]:remove(entity)
+			end
+
+			script_data[entitytype][index] = network.index
+			network:add(entity)
+
+			update_players(network)
+		end
 	end
 end
 
-local on_player_created = function( event )
-	PlayerStart( event.player_index )
+local on_player_created = function(event)
+    playerstart(event.player_index)
 end
 
 local on_player_removed = function( event )
-	local player_id = event.player_index
-
-	script_data.Position[player_id] = nil
-	script_data.GUIS[player_id] = nil
-	script_data.Visible[player_id] = nil
+    script_data.players[tostring(event.player_index)] = nil
 end
 
-local on_runtime_mod_setting_changed = function( event )
+local on_runtime_mod_setting_changed = function(event)
 	if event.setting == "Network-Update-Sec" then
-		UpdatePerTickUpdates()
+		updatepertickupdates()
+	end
+end
+
+local on_entity_removed = function(event)
+	local entity = event.entity
+
+	if not (entity and entity.valid) then return end
+
+	local name = entity.name
+
+	if wirelessnames[name] then
+		local entitytype = name:sub(10)
+		local index = tostring(entity.unit_number)
+		local index_number = script_data[entitytype][index]
+		
+		if index_number then
+			script_data.networks[index_number]:remove(entity)
+			script_data[entitytype][index] = nil
+		end
 	end
 end
 
@@ -518,17 +334,21 @@ local lib = {}
 
 lib.events =
 {
-	[de.on_tick] = on_tick,
-	[de.on_entity_cloned] = on_entity_cloned,
-	[de.on_entity_settings_pasted] = on_entity_cloned,
-	[de.on_gui_click] = on_gui_click,
-	[de.on_gui_closed] = on_gui_closed,
-	[de.on_gui_location_changed] = on_gui_location_changed,
-	[de.on_gui_opened] = on_gui_opened,
-	[de.on_gui_selection_state_changed] = on_gui_event,
-	[de.on_player_created] = on_player_created,
-	[de.on_player_removed] = on_player_removed,
-	[de.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed
+	[definesevents.on_tick] = on_tick,
+	[definesevents.on_entity_cloned] = on_entity_cloned,
+	[definesevents.on_entity_settings_pasted] = on_entity_cloned,
+	[definesevents.on_gui_click] = on_gui_click,
+	[definesevents.on_gui_closed] = on_gui_closed,
+	[definesevents.on_gui_location_changed] = on_gui_location_changed,
+	[definesevents.on_gui_opened] = on_gui_opened,
+	[definesevents.on_gui_selection_state_changed] = on_gui_selection_state_changed,
+	[definesevents.on_player_created] = on_player_created,
+	[definesevents.on_player_removed] = on_player_removed,
+	[definesevents.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
+	[definesevents.on_entity_died] = on_entity_removed,
+    [definesevents.on_robot_mined_entity] = on_entity_removed,
+    [definesevents.script_raised_destroy] = on_entity_removed,
+    [definesevents.on_player_mined_entity] = on_entity_removed,
 }
 
 lib.add_remote_interface = function()
@@ -536,94 +356,85 @@ lib.add_remote_interface = function()
 	(
 		"WirelessName",
 		{
-			Change = function( player_id, text )
-				local gui = script_data.GUIS[player_id]
+			Change = function(player_id, text)
+                local playermeta = script_data.players[tostring(player_id)]
 
-				if script_data.Visible[player_id] and gui.A["02"]["05"].visible then
-					gui["03"]["10"].text = text
+                if playermeta.textfield then
+                    playermeta.textfield.text = text
 
-					return false
-				else
-					return true
-				end
+                    return false
+                else
+                    return true
+                end
 			end
 		}
 	)
 end
 
-lib.on_load = function()
-	script_data = global.script_data or script_data
+lib.on_init = function()
+	global.wireless = global.wireless or script_data
+
+	updatepertickupdates()
+
+	playerload()
 end
 
-lib.on_configuration_changed = function( event )
+lib.on_load = function()
+	script_data = global.wireless or script_data
+
+	for _, player in pairs(script_data.players) do
+		setmetatable(player, player_lib.metatable)
+	end
+end
+
+lib.on_configuration_changed = function(event)
 	local changes = event.mod_changes or {}
 
-	if next( changes ) then
-		global.script_data = global.script_data or script_data
+	if next(changes) then
+		global.wireless = global.wireless or script_data
 
-		PlayerLoad()
+		playerload()
 
 		local wirelesschanges = changes["Wireless_Circuit_Network"] or {}
 
-		if next( wirelesschanges ) then
+		if next(wirelesschanges) then
 			local oldversion = wirelesschanges.old_version
 
 			if oldversion and wirelesschanges.new_version then
-				if oldversion <= "0.2.0" then
-					for _, player in pairs( game.players ) do
-						local button_flow = mod_button_flow( player )
-						local frame_flow = mod_gui.get_frame_flow( player )
+				if oldversion >= "0.3.4" then
+					local Networks = global.script_data.Networks
+					for index, name in pairs(Networks.Names) do
+						local index_number = tostring(script_data.index)
 
-						if button_flow.WirelessGUIButton then button_flow.WirelessGUIButton.destroy() end
-						if frame_flow.WirelessNetworksGUI then frame_flow.WirelessNetworksGUI.destroy() end
-					end
+						local network = network_lib.new(index_number, name)
+						script_data.networks[index_number] = network
+						table.insert(script_data.networknames, name)
+						script_data.names[name] = index_number
 
-					local Networks = script_data.Networks
-					local Sender = script_data.Sender
-					local Reciever = script_data.Reciever
-					local WirelessNetworks = global.WirelessNetworks
+						script_data.index = script_data.index + 1
 
-					for _, name in pairs( WirelessNetworks.N ) do
-						if AddNetwork( "addnew", nil, name ) then
-							local index_number =Format( "%04d", Networks.Number )
-							
-							for index, _ in pairs( WirelessNetworks.Sender[name] ) do
-								Sender[index] = index_number
-								Networks.Sender[index_number][index] = WirelessNetworks.E[index].e
+						for _, entity in pairs(Networks.Sender[index]) do
+							if entity.valid then
+								network:add(entity)
+								script_data.transmitter[tostring(entity.unit_number)] = index_number
 							end
+						end
 
-							for index, _ in pairs( WirelessNetworks.Reciever[name] ) do
-								Reciever[index] = index_number
-								Networks.Reciever[index_number][index] = WirelessNetworks.E[index].e
+						for _, entity in pairs(Networks.Reciever[index]) do
+							if entity.valid then
+								network:add(entity)
+								script_data.reciever[tostring(entity.unit_number)] = index_number
 							end
 						end
 					end
 
-					global.PlayerData = nil
-					global.WirelessNetworks = nil
-				end
-
-				if oldversion <= "0.3.1" then
-					for _, p in pairs( game.players ) do
-						if next( script_data.GUIS[p.index] ) then
-							script_data.GUIS[p.index].A["01"].destroy()
-							script_data.GUIS[p.index] = {}
-							script_data.Visible = false
-						end
-					end
+					global.script_data = nil
 				end
 			end
 		end
 
-		UpdatePerTickUpdates()
+		updatepertickupdates()
 	end
-end
-
-lib.on_init = function()
-	global.script_data = global.script_data or script_data
-
-	UpdatePerTickUpdates()
-	PlayerLoad()
 end
 
 return lib
