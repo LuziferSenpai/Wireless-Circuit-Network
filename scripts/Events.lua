@@ -385,6 +385,10 @@ lib.on_load = function()
 	for _, player in pairs(script_data.players) do
 		setmetatable(player, player_lib.metatable)
 	end
+
+	for _, network in pairs(script_data.networks) do
+		setmetatable(network, network_lib.metatable)
+	end
 end
 
 lib.on_configuration_changed = function(event)
