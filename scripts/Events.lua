@@ -401,7 +401,7 @@ lib.on_configuration_changed = function(event)
 			local oldversion = wirelesschanges.old_version
 
 			if oldversion and wirelesschanges.new_version then
-				if oldversion >= "0.3.4" then
+				if oldversion == "0.3.4" then
 					local Networks = global.script_data.Networks
 					for index, name in pairs(Networks.Names) do
 						local index_number = tostring(script_data.index)
@@ -428,7 +428,19 @@ lib.on_configuration_changed = function(event)
 						end
 					end
 
+					for _, player in pairs(game.players) do
+						if mod_gui.get_button_flow(player).WirelessButton then
+							mod_gui.get_button_flow(player).WirelessButton.destroy()
+						end
+					end
+
 					global.script_data = nil
+				elseif oldversion == "0.4.0" then
+					for _, player in pairs(game.players) do
+						if mod_gui.get_button_flow(player).WirelessButton then
+							mod_gui.get_button_flow(player).WirelessButton.destroy()
+						end
+					end
 				end
 			end
 		end
