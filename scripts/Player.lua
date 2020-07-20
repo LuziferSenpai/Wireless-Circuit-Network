@@ -39,7 +39,7 @@ function player_data:gui(networks)
     self.recieverflow = recieverflow
     self.line = frame.add{type = "line", direction = "horizontal"}
     self.line.visible = false
-    local addflow = frame.add{type = "flow", direction = "horizontal", style = "circuitflowcenterleft8"}
+    local addflow = frame.add{type = "flow", direction = "horizontal", style = "wirelessflowcenterleft8"}
     addflow.add{type = "label", caption = {"Wireless.Name"}}
     self.textfield = addflow.add{type = "textfield"}
     addflow.add{type = "button", name = "WIRELESS_CLICK_04", caption = {"Wireless.AddNetwork"}}
