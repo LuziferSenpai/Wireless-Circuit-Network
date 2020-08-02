@@ -25,7 +25,7 @@ function player_data:gui(networks)
     networkflow.add{type = "label", caption = {"Wireless.NetworkTitle"}, style = "caption_label"}
     networkflow.add{type = "empty-widget", style = "wirelesswidget"}
     self.dropdown = networkflow.add{type = "drop-down", name = "WIRELESS_DROP_01", items = networks}
-    networkflow.add{type = "sprite-button", name = "WIRELESS_CLICK_03", sprite = "Senpais-remove", style = "wirelesstoolbutton"}
+    networkflow.add{type = "sprite-button", name = "WIRELESS_CLICK_03", sprite = "utility/trash", style = "tool_button_red"}
     frame.add{type = "line", direction = "horizontal"}
     local transmitterflow = frame.add{type = "flow", direction = "horizontal"}
     transmitterflow.add{type = "label", caption = {"Wireless.Transmitter"}, style = "description_label"}

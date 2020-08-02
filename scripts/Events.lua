@@ -78,8 +78,10 @@ local on_tick = function()
 	local currenttick = script_data.currenttick
 	local updatenetworks = script_data.pertickupdates[currenttick]
 	
-	for _, index in pairs( updatenetworks ) do
-		networks[index]:update()
+	for _, index in pairs(updatenetworks) do
+		if networks[index] then
+			networks[index]:update()
+		end
 	end
 
 	if currenttick == script_data.maximumupdates then
@@ -148,7 +150,7 @@ local on_gui_click = function(event)
 					script_data.reciever[index_number] = nil
 				end
 
-				script_data.networknames[selected_index] = nil
+				table.remove(script_data.networknames, selected_index)
 				script_data.names[network.name] = nil
 				script_data.networks[index] = nil
 
@@ -198,6 +200,7 @@ local on_gui_click = function(event)
 					local index = tostring(script_data.index)
 
 					script_data.networks[index] = network_lib.new(index, text)
+					playermeta.textfield.text = ""
 					table.insert(script_data.networknames, text)
 					script_data.names[text] = index
 
