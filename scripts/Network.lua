@@ -102,7 +102,7 @@ function network:update()
 
         for _, entity in pairs(self.reciever) do
             if entity.valid then
-                entity.get_or_create_control_behavior().parameters = {parameters = parameters}
+                entity.get_or_create_control_behavior().parameters = parameters
             end
         end
     end

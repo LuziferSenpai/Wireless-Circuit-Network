@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.4.7
+Date: 24.11.2020
+  Changes:
+    - Update to 1.1
+---------------------------------------------------------------------------------------------------
+Version: 0.4.6
+Date: 08.08.2020
+  Bugfixes:
+    - Fixed a missspell
+---------------------------------------------------------------------------------------------------
 Version: 0.4.5
 Date: 02.08.2020
   Bugfixes:
@@ -78,33 +88,33 @@ Date: 20.05.2019
     - Updated the Locale
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.5
-Date: -
+Date: ???
   Changes:
     - Added forgotten Recipe Ingredient
     - A bit of Code rework
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.4
-Date: -
+Date: ???
   Changes:
     - Changed the Updates from Sec to Ticks
     - Now you can have it update every Tick, but that can lagg the Game
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.3
-Date: -
+Date: ???
   Bugfixes:
     - Fixed a Bug that the Button is not showing on Player created
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
-Date: -
+Date: ???
   Bugfixes:
     - Fixed a Bug when on the Wires are no Signal it gives a Error
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
-Date: -
+Date: ???
   Features:
     - Added the forgotten OnRemove Stuff
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0
-Date: -
+Date: ???
   Features:
     - Release

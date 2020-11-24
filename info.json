@@ -1,10 +1,11 @@
 {
-  "name": "Wireless_Circuit_Network",
-  "version": "0.4.5",
-  "title": "Wireless Circuit Network",
-  "author": "LuziferSenpai",
-  "Licence": "Custom",
-  "description": "This Modification for Factorio adds a Sender a Reciever that can be configuarted into Groups and the Sender in the Groups send there Signals to the Reciever in that Group.",
-  "dependencies": ["base >= 0.18.33"],
-  "factorio_version": "0.18"
+    "name": "Wireless_Circuit_Network",
+    "version": "0.4.7",
+    "title": "Wireless Circuit Network",
+    "author": "LuziferSenpai",
+    "contact": "mods@luzifersenpai.de",
+    "homepage": "luzifersenpai.de",
+    "description": "This Modification for Factorio adds a Sender a Reciever that can be configuarted into Groups and the Sender in the Groups send there Signals to the Reciever in that Group.",
+    "dependencies": ["base"],
+    "factorio_version": "1.1"
 }

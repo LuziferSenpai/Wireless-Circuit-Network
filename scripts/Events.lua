@@ -1,4 +1,3 @@
-require "mod-gui"
 require "util"
 
 local player_lib = require "scripts/Player"
@@ -25,7 +24,7 @@ local script_data =
 
 local update_players = function(network)
 	for _, player in pairs(script_data.players) do
-		if player.dropdown and script_data.networknames(player.dropdown.selected_index) == network.name then
+		if player.dropdown and script_data.networknames[player.dropdown.selected_index] == network.name then
 			player.transmitterlabel.caption = table_size(network.transmitter)
 			player.recieverlabel.caption = table_size(network.reciever)
 		end
